@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const { Schema } = require('zod');
+import { MONGO_CONNECT_URL } from './config';
 
-mongoose.connect('mongodb+srv://dsoot53:OZabuxPLSr7YsNGQ@cluster0.nu5mcja.mongodb.net/paytm-users');
+mongoose.connect(MONGO_CONNECT_URL);
 
 const userSchema = new mongoose.Schema({
     username: {
