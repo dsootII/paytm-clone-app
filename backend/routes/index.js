@@ -1,10 +1,16 @@
 const express = require('express');
-const userRouter = require('./user');
-const accountRouter = require('./account');
+const {userRouter} = require('./user');
+const {accountRouter} = require('./account');
 
-const router = express.Router();
+const rootRouter = express.Router();
 
-router.use('/user', userRouter);
-router.use('/account', accountRouter);
+rootRouter.use('/user', userRouter);
+rootRouter.use('/account', accountRouter);
 
-module.exports = { router }
+rootRouter.get('/', (req, res) => {
+    res.status(200).json({
+        msg: "You've reached the root router. hit '/user' or '/account' for data."
+    })
+});
+
+module.exports = { rootRouter };

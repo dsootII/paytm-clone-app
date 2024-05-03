@@ -3,15 +3,20 @@ const z = require('zod');
 const jwt = require('jsonwebtoken');
 const { UserModel, AccountModel } = require('../db');
 const { JWT_SECRET } = require('../config');
-import authMiddleware from '../middleware';
+const {authMiddleware} = require('../middleware');
+const mongoose = require('mongoose');
 
 const accountRouter = express.Router();
 
 accountRouter.get('/balance', authMiddleware, async (req, res) => {
+    console.log(req.body.userId);
     const account = await AccountModel.find({ user: req.body.userId });
+
+    console.log("account: ", account);
+
     if (account) {
         res.status(200).json({
-            balance: account.balance
+            balance: account[0].balance
         })
     } else {
         res.status(411).json({
@@ -27,7 +32,8 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
     const { amount, to } = req.body;
 
     // Fetch the accounts within the transaction
-    const account = await Account.findOne({ userId: req.userId }).session(session);
+    const account = await AccountModel.findOne({ user: req.body.userId }).session(session);
+    console.log("account found, ", account);
 
     if (!account || account.balance < amount) {
         await session.abortTransaction();
@@ -36,7 +42,7 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
         });
     }
 
-    const toAccount = await Account.findOne({ userId: to }).session(session);
+    const toAccount = await AccountModel.findOne({ user: to }).session(session);
 
     if (!toAccount) {
         await session.abortTransaction();
@@ -46,8 +52,8 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
     }
 
     // Perform the transfer
-    await Account.updateOne({ userId: req.userId }, { $inc: { balance: -amount } }).session(session);
-    await Account.updateOne({ userId: to }, { $inc: { balance: amount } }).session(session);
+    await AccountModel.updateOne({ userId: req.body.userId }, { $inc: { balance: -amount } }).session(session);
+    await AccountModel.updateOne({ userId: to }, { $inc: { balance: amount } }).session(session);
 
     // Commit the transaction
     await session.commitTransaction();

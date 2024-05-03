@@ -4,16 +4,21 @@ const { UserModel } = require('./db');
 const { JWT_SECRET } = require('./config');
 
 
-export default function authMiddleware (req, res, next) {
+function authMiddleware (req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         res.status(411).json({
             msg: "invalid request"
         })
+        return
     }
+    console.log("middleware log. authorization header received:", authHeader);
     const token = jwt.verify(authHeader.split(" ")[1], JWT_SECRET);
+
+    console.log("middleware log. token received after jwt verification:\n", token);
+
     try {
-        req.userId = token.userId;
+        req.body.userId = token.userId;
         next();
     } catch(error) {
         console.log(error);
@@ -21,4 +26,6 @@ export default function authMiddleware (req, res, next) {
         return
     }
 }
+
+module.exports = {authMiddleware};
 

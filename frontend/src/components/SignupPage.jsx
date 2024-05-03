@@ -1,11 +1,45 @@
-import React from 'react'
+import React, { useState } from 'react'
 import InputBox from './buildingblocks/InputBox'
 import Button from './buildingblocks/Button'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import SigninPage from './SigninPage'
+import axios from 'axios';
+import DashboardPage from './DashboardPage'
+
 
 export default function SignupPage(props) {
+    const navigate = useNavigate();
+    const [credentials, setCredentials] = useState({
+        firstName: "",
+        lastName: "",
+        username: "",
+        password: ""
 
+    });
+
+    function onInputChange(e) {
+        const {name, value} = e.target;
+        setCredentials( prev => { return {...prev, [name]: value} } )
+    }
+
+
+    // console.log("component rendered. State: ", credentials);
+
+    function handleSubmit () {
+        axios.post("http://localhost:3000/api/v1/user/signup", credentials)
+        .then(response => {
+            console.log(response)
+            if (response.data.msg = "User created successfully") {
+                const token = response.data.token;
+                localStorage.setItem('token', token);
+                navigate('/dashboard');
+            }
+        })
+        .catch(error => console.log(error))
+    }
+    
+    
+    
     return (
     <div className='h-screen flex justify-center bg-gray-500' >
         <div className='flex flex-col justify-center'>
@@ -19,11 +53,11 @@ export default function SignupPage(props) {
             </div>
 
             <div >
-                <InputBox placeholder={"Please enter your first name"} label={"First Name"} />
-                <InputBox placeholder={"Please enter your last name"} label={"Last Name"} />
-                <InputBox placeholder={"Please enter your email"} label={"Email"} />
-                <InputBox placeholder={"Please enter a password"} label={"Password"} />
-                <Button className="pt-4" label={"Signup"} onClick={()=> alert("button clicked")} />
+                <InputBox placeholder={"Please enter your first name"} label={"First Name"} onChange={onInputChange} type={"text"}/>
+                <InputBox placeholder={"Please enter your last name"} label={"Last Name"} onChange={onInputChange} type={"text"}/>
+                <InputBox placeholder={"Please enter your email"} label={"Email"} onChange={onInputChange} type={"email"}/>
+                <InputBox placeholder={"Please enter a password"} label={"Password"} onChange={onInputChange} type={"password"}/>
+                <Button className="pt-4" label={"Signup"} onClick={handleSubmit} />
             </div>
             
             <div className="py-2 text-sm flex justify-center">

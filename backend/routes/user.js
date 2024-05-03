@@ -3,7 +3,7 @@ const z = require('zod');
 const jwt = require('jsonwebtoken');
 const { UserModel, AccountModel } = require('../db');
 const { JWT_SECRET } = require('../config');
-import authMiddleware from '../middleware';
+const {authMiddleware} = require('../middleware');
 
 
 const userRouter = express.Router();
@@ -11,7 +11,7 @@ const userRouter = express.Router();
 //SIGNUP ROUTE
 //input validation for signup
 const signupValidator = z.object({
-    username: z.string(),
+    username: z.string().email(),
     firstName: z.string(),
     lastName: z.string(),
     password: z.string()
@@ -19,15 +19,27 @@ const signupValidator = z.object({
 //route handling
 userRouter.post('/signup', async (req, res) => {
     const validatedData = signupValidator.safeParse(req.body);
+
+    console.log("request received on signup route. data in req.body:\n", req.body, "\ndata after safeparsing: \n", validatedData);
+
     if (validatedData.success) {
-        if ( await UserModel.find({username: req.body.username})) {
+        const possibleUser = await UserModel.find({username: req.body.username})
+        console.log("checked if user already exists. possible users: ", possibleUser);
+        if ( possibleUser.length > 0 ) {
             res.json({msg: "User already exists"});
+            console.log("user exists. signup aborted.");
             return
         }
         const newUser = await UserModel.create(req.body);
-        await AccountModel.create({user: newUser._id, balance: 1 + Math.random()*10000});
 
+        console.log("User created, user db id: ", newUser._id);
+        
+        await AccountModel.create({user: newUser._id, balance: 1 + Math.random()*10000});
         const token = jwt.sign({ userId: newUser._id }, JWT_SECRET);
+        
+        console.log("Signed token created for user. token: ", token);
+        console.log("checking jwt verification within signup route itself: ", jwt.verify(token, JWT_SECRET));
+        
         res.status(200).json({
             msg: "User created successfully",
             token: token
@@ -47,21 +59,36 @@ const signinValidator = z.object({
 });
 //route handling
 userRouter.post('/signin', async (req, res) => {
+    
+    console.log("signin request received. request body:\n", req.body);
     const validatedData = signinValidator.safeParse(req.body);
+    console.log("data after safeparsing:\n", validatedData);
 
-    const existingUser = await UserModel.find({ username: req.body.username, password: req.body.password});
-    if (!existingUser) {
-        res.status(411).json({
-            msg: "You don't have an account, please signup first"
-        });
-        return
+    if (validatedData.success) {
+        const existingUser = await UserModel.find({ username: req.body.username, password: req.body.password });
+        if (existingUser.length > 0) {
+            const token = jwt.sign({ userId: existingUser[0]._id }, JWT_SECRET);
+            res.status(200).json({
+            msg: "Sign-in successful",
+            token: token
+            });
+
+            console.log("checking jwt verify in signin route", jwt.verify(token, JWT_SECRET));
+            
+            return
+        } else {
+            res.status(411).json({
+                msg: "You don't have an account, please signup first"
+            });
+            return
+        }
+            
+    } else {
+        res.status(400).json({
+            msg: "Invalid inputs"
+        })
     }
-    const token = jwt.sign({ userId: existingUser._id }, JWT_SECRET);
-    res.status(200).json({
-        msg: "Sign-in successful",
-        token: token
-    });
-})
+});
 
 //update user info
 const updateBody = z.object({
@@ -70,7 +97,7 @@ const updateBody = z.object({
     lastName: z.string().optional(),
 })
 
-router.put("/", authMiddleware, async (req, res) => {
+userRouter.put("/", authMiddleware, async (req, res) => {
     const { success } = updateBody.safeParse(req.body)
     if (!success) {
         res.status(411).json({
@@ -79,7 +106,7 @@ router.put("/", authMiddleware, async (req, res) => {
     }
 
     await User.updateOne(req.body, {
-        _id: req.userId
+        _id: req.body.userId
     })
 
     res.json({

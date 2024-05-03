@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = require('zod');
-import { MONGO_CONNECT_URL } from './config';
+const { MONGO_CONNECT_URL } = require('./config');
 
 mongoose.connect(MONGO_CONNECT_URL);
 
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
 
 const accountSchema = new mongoose.Schema({
     user: {
-        type: Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId, 
         ref: "User"
     },
     balance: {
