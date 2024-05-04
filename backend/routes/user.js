@@ -12,9 +12,9 @@ const userRouter = express.Router();
 //input validation for signup
 const signupValidator = z.object({
     username: z.string().email(),
-    firstName: z.string(),
-    lastName: z.string(),
-    password: z.string()
+    firstName: z.string().min(2, "first name must have at least 2 characters"),
+    lastName: z.string().min(2, "first name must have at least 2 characters"),
+    password: z.string().min(6)
 });
 //route handling
 userRouter.post('/signup', async (req, res) => {
@@ -54,8 +54,8 @@ userRouter.post('/signup', async (req, res) => {
 //SIGNIN ROUTE
 //input validation for signin
 const signinValidator = z.object({
-    username: z.string(),
-    password: z.string()
+    username: z.string().email(),
+    password: z.string().min(6)
 });
 //route handling
 userRouter.post('/signin', async (req, res) => {
@@ -74,7 +74,7 @@ userRouter.post('/signin', async (req, res) => {
             });
 
             console.log("checking jwt verify in signin route", jwt.verify(token, JWT_SECRET));
-            
+            console.log("user has been signed in");
             return
         } else {
             res.status(411).json({

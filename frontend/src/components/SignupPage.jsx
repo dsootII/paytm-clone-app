@@ -53,10 +53,10 @@ export default function SignupPage(props) {
             </div>
 
             <div >
-                <InputBox placeholder={"Please enter your first name"} label={"First Name"} onChange={onInputChange} type={"text"}/>
-                <InputBox placeholder={"Please enter your last name"} label={"Last Name"} onChange={onInputChange} type={"text"}/>
-                <InputBox placeholder={"Please enter your email"} label={"Email"} onChange={onInputChange} type={"email"}/>
-                <InputBox placeholder={"Please enter a password"} label={"Password"} onChange={onInputChange} type={"password"}/>
+                <InputBox placeholder={"Please enter your first name"} name="firstName" label={"First Name"} onChange={onInputChange} type={"text"}/>
+                <InputBox placeholder={"Please enter your last name"} name="lastName" label={"Last Name"} onChange={onInputChange} type={"text"}/>
+                <InputBox placeholder={"Please enter your email"} name="username" label={"Email"} onChange={onInputChange} type={"email"}/>
+                <InputBox placeholder={"Please enter a password"} name="password" label={"Password"} onChange={onInputChange} type={"password"}/>
                 <Button className="pt-4" label={"Signup"} onClick={handleSubmit} />
             </div>
             

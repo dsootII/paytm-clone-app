@@ -40,8 +40,8 @@ export default function SigninPage(props) {
                     Enter your credentials to log in.
                 </div>
 
-                <InputBox placeholder={"Please enter your email"} label={"Email"} type={"email"} onChange={onInputChange}/>
-                <InputBox placeholder={"Please enter a password"} label={"Password"} type={"password"} onChange={onInputChange}/>
+                <InputBox placeholder={"Please enter your email"} name="username" label={"Email"} type={"email"} onChange={onInputChange}/>
+                <InputBox placeholder={"Please enter a password"} name="password" label={"Password"} type={"password"} onChange={onInputChange}/>
                 <Button label={"Sign In"} onClick={handleSubmit} />
             </div>
 
