@@ -33,7 +33,7 @@ export default function UsersList(props) {
 
     function handleSearchInput (e) {
         searchInputRef.current = e.target.value;
-
+        console.log("value of searchInputRef inside the handleSearchInput", searchInputRef.current);
         setSearchedUsers(users.filter((val, i, arr) =>{
             const [fn, ln] = val.split(' ');
             return (
@@ -45,6 +45,7 @@ export default function UsersList(props) {
     }
 
     const currentUserFullName = props.fromUser.firstName+' '+props.fromUser.lastName;
+    console.log("value of searchInputRef inside the function code, ", searchInputRef.current);
 
 
     return(
@@ -76,6 +77,8 @@ export default function UsersList(props) {
                     searchedUsers
                     .filter((val)=>{return val !== currentUserFullName}) //so that you don't see your own name on the list. 
                     .map(user => {
+                        console.log("html val: ", user);
+                        console.log("value of searchInputRef inside the return statement, ", searchInputRef.current);
                     return (
                         <div key={user} className='flex justify-center'>
                             <div className='flex justify-between shadow-sm w-4/5'> 
