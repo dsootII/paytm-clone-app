@@ -1,7 +1,7 @@
 const express = require('express');
 const z = require('zod');
 const jwt = require('jsonwebtoken');
-const { UserModel, AccountModel } = require('../db');
+const { UserModel, AccountModel, TransactionModel } = require('../db');
 const { JWT_SECRET } = require('../config');
 const {authMiddleware} = require('../middleware');
 
@@ -67,13 +67,21 @@ userRouter.post('/signin', async (req, res) => {
     if (validatedData.success) {
         const existingUser = await UserModel.find({ username: req.body.username, password: req.body.password });
         if (existingUser.length > 0) {
-            const token = jwt.sign({ userId: existingUser[0]._id }, JWT_SECRET);
+            console.log("finding balance of this user...");
+            const existingUserAccount = await AccountModel.findOne({user: existingUser[0]._id});
+            console.log("balance found: ", existingUserAccount);
+
+            const token = jwt.sign({ userId: existingUser[0]._id }, JWT_SECRET);    
+            
             res.status(200).json({
             msg: "Sign-in successful",
-            token: token
+            token: token,
+            firstName: existingUser[0].firstName,
+            lastName: existingUser[0].lastName,
+            balance: existingUserAccount.balance
             });
 
-            console.log("checking jwt verify in signin route", jwt.verify(token, JWT_SECRET));
+            console.log("checking jwt verification before proceeding.", jwt.verify(token, JWT_SECRET));
             console.log("user has been signed in");
             return
         } else {
@@ -115,29 +123,55 @@ userRouter.put("/", authMiddleware, async (req, res) => {
 })
 
 userRouter.get('/bulk', authMiddleware, async (req, res) => {
-    const query = req.query.filter || "";
-    //we don't know if this is firstName or lastName
-    const usersFound = await UserModel.find({
-        $or: [{
-            firstName: {
-                $regex: query
-            }
-        }, {
-            lastName: {
-                $regex: query
-            }
-        }]
-    });
-    const result = [];
-    for (let user of usersFound) {
-        result.push({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            _id: user._id
-        });
+    console.log(req.query);
+    if (req.query.fullName) {
+        const [queryFN, queryLN] = req.query.fullName.split(' ');
+        console.log("query received for /bulk:\n", req.query);
+        const usersFound = await UserModel.find({
+            firstName: queryFN,
+            lastName: queryLN
+        })
+    
+        const result = [];
+        for (let user of usersFound) {
+            result.push({
+                firstName: user.firstName,
+                lastName: user.lastName,
+                _id: user._id
+            });
+        }
+        res.status(200).json({users: result});
+    } else {
+        const allUsers = await UserModel.find();
+        res.status(200).json({users: allUsers});
     }
-    res.status(200).json({users: result});
+
+    
 });
+
+userRouter.get('/dashboard', authMiddleware, async (req, res) => {
+    const userId = req.query.userId;
+
+    const user = await UserModel.findById(userId);
+    const account = await AccountModel.findOne({user: userId});
+    const dashboardDetails = {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        balance: account.balance
+    }
+
+    res.status(200).json(dashboardDetails);
+
+})
+
+userRouter.get('/transactions', authMiddleware, async (req, res) => {
+    const userId = req.query.userId;
+
+    const transactions = await TransactionModel.find({sender: userId});
+    res.status(200).json({
+        transactions: transactions
+    })
+})
 
 
 module.exports = {userRouter};

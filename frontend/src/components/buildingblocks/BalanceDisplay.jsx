@@ -1,10 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export default function BalanceDisplay(props) {
 
-    const [balance, setBalance] = useState(10000);
-
-    function formatBalance(amount){
+    function formatBalance (amount) {
         const reversedAmount = amount.toString().split("").reduce((acc, char) => char + acc, "");
         let formattedReverse = '';
         for (let i=0; i<reversedAmount.length; i++) {
@@ -17,8 +15,12 @@ export default function BalanceDisplay(props) {
         return formattedAmount
     }
 
+
+
     return(
-        <div className='p-4 ml-2 flex'>
-            <div className='font-semibold px-2'>Your balance is:</div> <div className='font-bold'> Rs {formatBalance(balance)} </div>
+        <div className='p-6 ml-2 flex'>
+            <div className='flex border-2 px-4 py-2' onClick={()=>alert('yes you can click on this div')}>
+                <div className='font-semibold px-2'>Your balance is:</div> <div className='font-bold'> Rs {formatBalance(Math.round(props.User.balance))} </div>
+            </div>
         </div>
 )}

@@ -29,10 +29,13 @@ export default function SignupPage(props) {
         axios.post("http://localhost:3000/api/v1/user/signup", credentials)
         .then(response => {
             console.log(response)
-            if (response.data.msg = "User created successfully") {
+            try {
                 const token = response.data.token;
-                localStorage.setItem('token', token);
+                setToken(token);
                 navigate('/dashboard');
+            } catch (error) {
+                console.log(error);
+                navigate("/signup");
             }
         })
         .catch(error => console.log(error))

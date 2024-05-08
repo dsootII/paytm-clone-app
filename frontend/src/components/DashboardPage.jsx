@@ -1,27 +1,48 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import BalanceDisplay from './buildingblocks/BalanceDisplay'
 import UsersList from './buildingblocks/UsersList'
+import { useLocation } from 'react-router-dom'
+import DashboardDropdownMenu from './buildingblocks/DashboardDropdownMenu'
+import { useAuthContext } from '../context/AuthContext'
+import { jwtDecode } from 'jwt-decode'
+import axios from 'axios'
 
 export default function DashboardPage(props) {
+
+    const [userDetails, setUserDetails] = useState({
+        firstName: "Wanderer",
+        lastName: "King",
+        balance: 200
+    });
+
+    const {token} = useAuthContext();
+    const {userId} = jwtDecode(token);
+
+    useEffect(() => {
+        axios.get('http://localhost:3000/api/v1/user/dashboard?userId='+userId)
+        .then(res => {
+            setUserDetails(res.data);
+        })
+    }, [])
+
+
 
     return( 
     <div>
         {/* Top Bar */}
         <div className='flex justify-between border-b-4 pt-2 px-2 shadow-lg '>
-            <div className='flex flex-col justify-center'>this is the dashboard page</div>
+            <div className="flex flex-col justify-center pl-3">{userDetails.firstName}'s dashboard page</div>
             <div className='flex justify-evenly m-1'>
                 <div className='flex flex-col justify-center px-4 h-full'>Hello</div>
-                <div className='flex justify-center border-black rounded-full bg-slate-400 p-2 h-12 w-12'>
-                    <div className='flex flex-col justify-center h-full text-xl'>U</div>
-                </div>
+                <DashboardDropdownMenu User={userDetails} />
             </div>   
         </div>
 
         {/* Balance display component */}
-        <BalanceDisplay />
+        <BalanceDisplay User={userDetails} />
 
         {/* Users List Component */}
-        <UsersList />
+        <UsersList fromUser={userDetails}/>
 
     </div>
 )}

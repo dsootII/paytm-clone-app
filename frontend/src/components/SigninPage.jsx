@@ -3,9 +3,12 @@ import InputBox from './buildingblocks/InputBox'
 import Button from './buildingblocks/Button'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { useAuthContext } from '../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 export default function SigninPage(props) {
-
+    const {setToken} = useAuthContext();
+    const navigate = useNavigate();
     const [loginDetails, setLoginDetails] = useState({
         username: '',
         password: ''
@@ -25,6 +28,19 @@ export default function SigninPage(props) {
         axios.post("http://localhost:3000/api/v1/user/signin", loginDetails)
         .then(response => {
             console.log(response);
+            try {
+                const token = response.data.token;
+                setToken(token);
+                const dashboardData = {
+                    firstName: response.data.firstName,
+                    lastName: response.data.lastName, 
+                    balance: response.data.balance
+                }
+                navigate('/dashboard', {state: dashboardData} );
+            } catch (error) {
+                console.log(error);
+                navigate("/signin");
+            }
         })
     }
 
