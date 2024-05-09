@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Schema } = require('zod');
+const { Schema, date, tuple } = require('zod');
 const { MONGO_CONNECT_URL } = require('./config');
 
 mongoose.connect(MONGO_CONNECT_URL);
@@ -17,7 +17,8 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        minLength: 6
+        minLength: 6,
+        select: false
     },
     firstName: {
         type: String,
@@ -47,37 +48,21 @@ const accountSchema = new mongoose.Schema({
 
 const transactionSchema = new mongoose.Schema({
     sender: {
-        id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true
-        },
-        firstName: {
-            type: String,
-            required: true
-        },
-        lastName: {
-            type: String,
-            required: true
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     receiver: {
-        id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true
-        },
-        firstName: {
-            type: String,
-            required: true
-        },
-        lastName: {
-            type: String,
-            required: true
-        }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     },
     amount: {
         type: Number,
+        required: true
+    },
+    created_at: {
+        type: Date,
         required: true
     }
 });

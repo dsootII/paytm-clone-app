@@ -33,10 +33,10 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
     console.log("request body received for transfer details:\n", req.body);
 
     // Fetch the accounts within the transaction
-    const account = await AccountModel.findOne({ user: req.body.userId }).session(session);
-    console.log("sender account found, ", account);
+    const fromAccount = await AccountModel.findOne({ user: req.body.userId }).session(session);
+    console.log("sender account found, ", fromAccount);
 
-    if (!account || account.balance < amount) {
+    if (!fromAccount || fromAccount.balance < amount) {
         await session.abortTransaction();
         return res.status(400).json({
             message: "Insufficient balance"
@@ -57,11 +57,12 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
     console.log("SENDER: ", req.body.userId);
     console.log("RECEIVER: ", to);
     console.log("AMOUNT: ", amount);
+    const currentDate = new Date();
 
     // Perform the transfer
     await AccountModel.updateOne({ user: req.body.userId }, { $inc: { balance: -amount } }).session(session);
     await AccountModel.updateOne({ user: to }, { $inc: { balance: amount } }).session(session);
-    await TransactionModel.create({ sender: {id: req.body.userId}, receiver: {id: to}, amount: amount });
+    await TransactionModel.create({ sender: {_id: req.body.userId}, receiver: {_id: to}, amount: amount, created_at: currentDate });
 
     // Commit the transaction
     await session.commitTransaction();
@@ -69,5 +70,9 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
         message: "Transfer successful"
     });
 });
+
+
+
+
 
 module.exports = { accountRouter }

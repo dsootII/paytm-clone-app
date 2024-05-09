@@ -167,9 +167,13 @@ userRouter.get('/dashboard', authMiddleware, async (req, res) => {
 userRouter.get('/transactions', authMiddleware, async (req, res) => {
     const userId = req.query.userId;
 
-    const transactions = await TransactionModel.find({sender: userId});
+    const sent_transactions = await TransactionModel.find({sender: userId}).populate(['sender', 'receiver']);
+    const received_transactions = await TransactionModel.find({receiver: userId}).populate(['sender', 'receiver']);
+    console.log("populated transaction document retreived (SENDER):\n", sent_transactions);
+    console.log("populated transaction document retreived (RECEIVER):\n", received_transactions);
     res.status(200).json({
-        transactions: transactions
+        sent_transactions: sent_transactions,
+        received_transactions: received_transactions
     })
 })
 

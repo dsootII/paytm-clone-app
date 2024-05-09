@@ -77,9 +77,7 @@ export default function UsersList(props) {
                     searchedUsers
                     .filter((val)=>{return val !== currentUserFullName}) //so that you don't see your own name on the list. 
                     .map(user => {
-                        console.log("html val: ", user);
-                        console.log("value of searchInputRef inside the return statement, ", searchInputRef.current);
-                    return (
+                        return (
                         <div key={user} className='flex justify-center'>
                             <div className='flex justify-between shadow-sm w-4/5'> 
                                 <div className='flex flex-col justify-end'>

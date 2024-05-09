@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import { Menu, Transition, MenuButton, MenuItems, MenuItem } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
@@ -55,15 +55,16 @@ export default function DashboardDropdownMenu({User}) {
             </MenuItem>
             <MenuItem>
               {({ active }) => (
-                <a
-                  href="#"
+                <Link
+                  to="/transactions"
+                  state={User}
                   className={classNames(
                     active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
                   )}
                 >
                  Transactinos
-                </a>
+                </Link>
               )}
             </MenuItem>
             <form method="POST" onSubmit={handleSignOut}>
