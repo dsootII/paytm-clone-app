@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { UserModel, AccountModel, TransactionModel } = require('../db');
 const { JWT_SECRET } = require('../config');
 const {authMiddleware} = require('../middleware');
+const bcrypt = require('bcrypt');
 
 
 const userRouter = express.Router();
@@ -13,43 +14,54 @@ const userRouter = express.Router();
 const signupValidator = z.object({
     username: z.string().email(),
     firstName: z.string().min(2, "first name must have at least 2 characters"),
-    lastName: z.string().min(2, "first name must have at least 2 characters"),
+    lastName: z.string().min(2, "last name must have at least 2 characters"),
     password: z.string().min(6)
 });
 //route handling
 userRouter.post('/signup', async (req, res) => {
-    const validatedData = signupValidator.safeParse(req.body);
 
-    console.log("request received on signup route. data in req.body:\n", req.body, "\ndata after safeparsing: \n", validatedData);
+    const validatedData = signupValidator.safeParse(req.body);
+    console.log("data after safeparsing: \n", validatedData);
 
     if (validatedData.success) {
-        const possibleUser = await UserModel.find({username: req.body.username})
+        const {username, firstName, lastName} = validatedData.data;
+        const possibleUser = await UserModel.find({username: username})
         console.log("checked if user already exists. possible users: ", possibleUser);
         if ( possibleUser.length > 0 ) {
             res.json({msg: "User already exists"});
             console.log("user exists. signup aborted.");
             return
         }
-        const newUser = await UserModel.create(req.body);
 
-        console.log("User created, user db id: ", newUser._id);
-        
-        await AccountModel.create({user: newUser._id, balance: 1 + Math.random()*10000});
-        const token = jwt.sign({ userId: newUser._id }, JWT_SECRET);
-        
-        console.log("Signed token created for user. token: ", token);
-        console.log("checking jwt verification within signup route itself: ", jwt.verify(token, JWT_SECRET));
-        
-        res.status(200).json({
-            msg: "User created successfully",
-            token: token
-        });
+        try {
+            const hashedPassword = await bcrypt.hash(req.body.password, 10);
+            console.log("password hashing complete. hashed password:\n", hashedPassword);
+
+            const newUser = await UserModel.create({ username, firstName, lastName, password: hashedPassword });
+            console.log("User created, user db id: ", newUser._id);
+            
+            await AccountModel.create({user: newUser._id, balance: 1 + Math.random()*10000});
+            console.log("Account created for new user with a random balance.");
+            
+            const token = jwt.sign({ userId: newUser._id }, JWT_SECRET);
+            console.log("Signed token created for user. token: ", token);
+            console.log("checking jwt verification within signup route itself: ", jwt.verify(token, JWT_SECRET));
+            
+            res.status(200).json({
+                msg: "User created successfully",
+                token: token
+            });
+
+        } catch (err) {
+            res.json({msg: "error occured during signup"})
+            return
+        }
 
     } else {
         res.json({ msg: "Invalid inputs "});
         return
     }
-})
+});
 
 //SIGNIN ROUTE
 //input validation for signin
@@ -65,19 +77,32 @@ userRouter.post('/signin', async (req, res) => {
     console.log("data after safeparsing:\n", validatedData);
 
     if (validatedData.success) {
-        const existingUser = await UserModel.find({ username: req.body.username, password: req.body.password });
-        if (existingUser.length > 0) {
-            console.log("finding balance of this user...");
-            const existingUserAccount = await AccountModel.findOne({user: existingUser[0]._id});
-            console.log("balance found: ", existingUserAccount);
+        console.log("finding associated user...");
+        const existingUser = await UserModel.findOne({ username: req.body.username }).select("+password");
+        console.log("user found:\n", existingUser);
+        
+        if (existingUser) {
+            console.log("validating password...");
+            const isPasswordValid = await bcrypt.compare(req.body.password, existingUser.password);
+            if (!isPasswordValid) {
+                res.json({
+                    msg: "invalid password"
+                })
+                return
+            }
+            console.log("password validated successfully.")
 
-            const token = jwt.sign({ userId: existingUser[0]._id }, JWT_SECRET);    
+            console.log("finding balance of this user...");
+            const existingUserAccount = await AccountModel.findOne({user: existingUser._id});
+            console.log("balance found: ", existingUserAccount.balance);
+
+            const token = jwt.sign({ userId: existingUser._id }, JWT_SECRET);    
             
             res.status(200).json({
             msg: "Sign-in successful",
             token: token,
-            firstName: existingUser[0].firstName,
-            lastName: existingUser[0].lastName,
+            firstName: existingUser.firstName,
+            lastName: existingUser.lastName,
             balance: existingUserAccount.balance
             });
 
