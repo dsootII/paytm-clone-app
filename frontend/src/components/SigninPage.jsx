@@ -45,7 +45,7 @@ export default function SigninPage(props) {
     }
 
     return( 
-    <div className='h-screen flex justify-center bg-gray-500'>
+    <div className='h-screen flex justify-center bg-gray-300'>
         <div className='flex flex-col justify-center'>
 
             <div className='bg-white p-5 rounded-lg shadow-lg'>

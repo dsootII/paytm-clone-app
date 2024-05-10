@@ -44,6 +44,11 @@ export default function UsersList(props) {
         }));
     }
 
+    function handleFriendship(e, user) {
+        
+
+    }
+
     const currentUserFullName = props.fromUser.firstName+' '+props.fromUser.lastName;
     console.log("value of searchInputRef inside the function code, ", searchInputRef.current);
 
@@ -78,13 +83,22 @@ export default function UsersList(props) {
                     .filter((val)=>{return val !== currentUserFullName}) //so that you don't see your own name on the list. 
                     .map(user => {
                         return (
-                        <div key={user} className='flex justify-center'>
-                            <div className='flex justify-between shadow-sm w-4/5'> 
-                                <div className='flex flex-col justify-end'>
+                        <div key={user} className='flex justify-center w-full'>
+                            <div className='text-sm md:text-base flex justify-between shadow-sm md:w-4/5 w-full'> 
+                                <div className='flex flex-col justify-center md:justify-end'>
                                     {user}
                                 </div>
+
                                 <div className='flex flex-col justify-center'>
-                                    <Button label={"Send Money"} onClick={() => navigate('/send', {state: {toUser: user}})} />
+                                    {/* Buttons */}
+                                    <div className='flex text-xs'>
+                                        <div className='px-2'>
+                                            <Button className="text-xs" label={"Send Money"} onClick={() => navigate('/send', {state: {toUser: user}})} />
+                                        </div>
+                                        <div>
+                                            <Button className="text-xs" label={"Befriend"} onClick={handleFriendship(e, user)} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -14,7 +14,7 @@ export default function DashboardDropdownMenu({User}) {
   function handleSignOut (e) {
     e.preventDefault();
     localStorage.removeItem('token');
-    navigate('/signin');
+    navigate('/signup');
   }
 
 
