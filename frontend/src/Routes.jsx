@@ -18,6 +18,10 @@ export default function Routes() {
       {
         path: '/signin',
         element: <SigninPage />
+      },
+      {
+        path: '/',
+        element: <SignupPage />
       }
     ];
 

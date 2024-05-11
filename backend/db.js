@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { Schema, date, tuple } = require('zod');
 const { MONGO_CONNECT_URL } = require('./config');
 
+
 mongoose.connect(MONGO_CONNECT_URL);
 
 const userSchema = new mongoose.Schema({
@@ -31,7 +32,12 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true,
         maxLength: 50
-    }
+    },
+    friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        sparse: true
+    }]
 });
 
 const accountSchema = new mongoose.Schema({

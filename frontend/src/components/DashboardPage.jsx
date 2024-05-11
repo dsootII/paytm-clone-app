@@ -19,6 +19,7 @@ export default function DashboardPage(props) {
     const {userId} = jwtDecode(token);
 
     useEffect(() => {
+        
         axios.get('http://localhost:3000/api/v1/user/dashboard?userId='+userId)
         .then(res => {
             setUserDetails(res.data);

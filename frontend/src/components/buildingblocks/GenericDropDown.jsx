@@ -1,12 +1,33 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Menu, Transition, MenuButton, MenuItems, MenuItem} from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { useAuthContext } from '../../context/AuthContext'
+import { jwtDecode } from 'jwt-decode'
+import axios from 'axios'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function GenericDropDown() {
+export default function GenericDropDown(props) {
+
+  const {token} = useAuthContext();
+  const {userId} = jwtDecode(token);
+
+  useEffect( () => {
+    //get friend list of the user
+    
+  }, [])
+
+  function handleFriendsList() {
+    props.setSearchedUsers( props.friendsList );
+  }
+
+  function handleFullList() {
+    props.setSearchedUsers([ ...props.allUsers ])
+  }
+
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
@@ -28,42 +49,29 @@ export default function GenericDropDown() {
         <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
             <MenuItem>
-              {({ active }) => (
-                <a
-                  href="#"
+              {({ focus }) => (
+                <div
                   className={classNames(
-                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                    focus ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
                   )}
-                >
-                  Frequents
-                </a>
-              )}
-            </MenuItem>
-            <MenuItem>
-              {({ active }) => (
-                <a
-                  href="#"
-                  className={classNames(
-                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    'block px-4 py-2 text-sm'
-                  )}
+                  onClick={handleFriendsList}
                 >
                   Friends
-                </a>
+                </div>
               )}
             </MenuItem>
             <MenuItem>
-              {({ active }) => (
-                <a
-                  href="#"
+              {({ focus }) => (
+                <div
                   className={classNames(
-                    active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                    focus ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     'block px-4 py-2 text-sm'
                   )}
+                  onClick={handleFullList}
                 >
                   All
-                </a>
+                </div>
               )}
             </MenuItem>
           </div>

@@ -4,6 +4,7 @@ import InputBox from './InputBox';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GenericDropDown from './GenericDropDown';
+import FriendshipButton from './FriendshipButton';
 
 export default function UsersList(props) {
 
@@ -12,10 +13,15 @@ export default function UsersList(props) {
     const searchInputRef = useRef(null);
     const [searchedUsers, setSearchedUsers] = useState([...users]); //this is not exactly needed as the useEffect anyway sets them both to what db gives back.
     const [foundUsers, setFoundUsers] = useState(true);
+    const [friendsList, setFriendsList] = useState([]);
+    const [frequentsList, setFrequentsList] = useState([]);
+
     const navigate = useNavigate();
 
 
+
     useEffect(() => {
+        //getting all users
         axios.get("http://localhost:3000/api/v1/user/bulk")
         .then(response => {
             if (response) {
@@ -28,12 +34,25 @@ export default function UsersList(props) {
             } else {
                 setFoundUsers(false);
             }
-        })
+        });
+        //getting all friends of current user
+        axios.get('http://localhost:3000/api/v1/user/getfriends')
+        .then(res => {
+            let listOfFriends = [];
+            for (let item of res.data.friends) {
+                listOfFriends.push(item.firstName+' '+item.lastName);
+            }
+            setFriendsList(listOfFriends);
+        });
+        //getting all frequents of the current user (will complete this later)
+        // axios.get('http://localhost:3000/api/v1/user/frequents')
+        // .then(res => {
+        //     console.log("FREQUENTS AXIOS RESPONSE", res);
+        // })
     }, [])
 
     function handleSearchInput (e) {
         searchInputRef.current = e.target.value;
-        console.log("value of searchInputRef inside the handleSearchInput", searchInputRef.current);
         setSearchedUsers(users.filter((val, i, arr) =>{
             const [fn, ln] = val.split(' ');
             return (
@@ -44,14 +63,13 @@ export default function UsersList(props) {
         }));
     }
 
-    function handleFriendship(e, user) {
-        
-
+    function handleReload() {
+        window.location.reload();
     }
 
-    const currentUserFullName = props.fromUser.firstName+' '+props.fromUser.lastName;
-    console.log("value of searchInputRef inside the function code, ", searchInputRef.current);
+    
 
+    const currentUserFullName = props.fromUser.firstName+' '+props.fromUser.lastName;
 
     return(
         // full user list container
@@ -63,15 +81,27 @@ export default function UsersList(props) {
 
                 <div className='flex'>
                     <div className='flex'>
+                        {/* Icon */}
                         <div className='flex flex-col justify-end pb-1 pr-1'>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                             </svg>
                         </div>
+                        
+                        {/* Search Bar */}
                         <InputBox label={""} placeholder={"Search Users..."} onChange={handleSearchInput} type="text" name="searchBar" />
                     </div>
-                    <div className='flex flex-col justify-end px-2'><GenericDropDown /></div>
                     
+                    {/* Dropdown */}
+                    <div className='flex flex-col justify-end px-2'><GenericDropDown setSearchedUsers={setSearchedUsers} allUsers={users} friendsList={friendsList} setFriendsList={setFriendsList}/></div>
+                    
+                    {/* Reload Button */}
+                    <div className='flex flex-col justify-end px-1 py-2' onClick={handleReload}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 hover:text-green-500 hover:shadow-lg rounded-full">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                    </div>
+
                 </div>
 
             </div>
@@ -84,8 +114,8 @@ export default function UsersList(props) {
                     .map(user => {
                         return (
                         <div key={user} className='flex justify-center w-full'>
-                            <div className='text-sm md:text-base flex justify-between shadow-sm md:w-4/5 w-full'> 
-                                <div className='flex flex-col justify-center md:justify-end'>
+                            <div className='text-sm md:text-base flex justify-between shadow-sm md:w-4/5 w-full hover:shadow-lg rounded-lg hover:font-bold'> 
+                                <div className='flex flex-col justify-center md:justify-end pl-1 '>
                                     {user}
                                 </div>
 
@@ -96,7 +126,7 @@ export default function UsersList(props) {
                                             <Button className="text-xs" label={"Send Money"} onClick={() => navigate('/send', {state: {toUser: user}})} />
                                         </div>
                                         <div>
-                                            <Button className="text-xs" label={"Befriend"} onClick={handleFriendship(e, user)} />
+                                            <FriendshipButton user={user} friendsList={friendsList}/>
                                         </div>
                                     </div>
                                 </div>

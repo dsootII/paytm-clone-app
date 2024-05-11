@@ -12,11 +12,8 @@ function authMiddleware (req, res, next) {
         })
         return
     }
-    console.log("middleware log. authorization header received:", authHeader);
     const token = jwt.verify(authHeader.split(" ")[1], JWT_SECRET);
-
-    console.log("middleware log. token received after jwt verification:\n", token);
-
+    
     try {
         req.body.userId = token.userId;
         next();

@@ -53,7 +53,8 @@ userRouter.post('/signup', async (req, res) => {
             });
 
         } catch (err) {
-            res.json({msg: "error occured during signup"})
+            res.json({msg: "error occured during signup", error: err});
+            console.log(err);
             return
         }
 
@@ -200,6 +201,103 @@ userRouter.get('/transactions', authMiddleware, async (req, res) => {
         sent_transactions: sent_transactions,
         received_transactions: received_transactions
     })
+})
+
+userRouter.post('/setfriend', authMiddleware, async (req, res) => {
+    console.log("received request for setting friend")
+    const {userId} = req.body;
+    const {firstName, lastName} = req.body;
+
+    const user = await UserModel.findOne({_id: userId});
+    const friend = await UserModel.findOne({firstName: firstName, lastName: lastName})
+    console.log("user found:\n", user);
+    console.log("friend found ", friend);
+
+    if (user.friends.length===0) {
+        user.friends.push(friend._id);
+        await user.save();
+        res.status(200).json({msg: "friend added successfully"});
+        console.log("friend added")
+        return
+    }
+
+    if(user.friends.length>0 && !user.friends.includes(friend._id)) {
+        user.friends.push(friend._id);
+        await user.save();
+        res.status(200).json({msg: "friend added successfully"});
+        console.log("friend added")
+    } else {
+        res.status(200).json({msg: "friend already exists"});
+    }
+    
+});
+
+userRouter.get('/getfriends', authMiddleware, async (req, res) => {
+    console.log('received request for getting all friends..');
+    const {userId} = req.body;
+
+    const user = await UserModel.findById(userId);
+    const friendList = await user.populate({
+        path: 'friends',
+        select: 'firstName lastName'
+    });
+    console.log('friend list found for user', user.firstName);
+
+    res.json({
+        msg: "friends found",
+        friends: friendList.friends
+    })
+});
+
+userRouter.post('/unfriend', authMiddleware, async (req, res) => {
+    console.log("received request for unfriending..")
+    const {userId} = req.body; //of current user
+    const {firstName, lastName} = req.body; //of friend
+
+    const user = await UserModel.findOne({_id: userId});
+    const friend = await UserModel.findOne({firstName: firstName, lastName: lastName})
+    console.log("user found:\n", user);
+    console.log("friend found ", friend);
+
+    let arrayIndex = user.friends.indexOf(friend._id);
+    if (arrayIndex !== -1) {
+        user.friends.splice(arrayIndex, 1);
+        await user.save();
+        console.log('friend removed');
+        res.json({
+            msg: "friend removed"
+        })
+    } else {
+        console.log('error occured')
+        res.status(411).json({
+            msg: "Error occured while removing friend"
+        })
+    }
+});
+
+//Attempted frequents functionality but isn't working, will do this later. 
+userRouter.get('/frequents', authMiddleware, async (req, res) => {
+    console.log('received request for getting frequents...');
+    const {userId} = req.body;
+    try {
+        const topUsers = await TransactionModel.aggregate([
+            { $match: { sender: userId } }, // Find transactions where current user is sender
+            {
+                $group: {
+                    _id: "$receiver",
+                    count: { $sum: 1 } //this shit is confusing man. but for a sender, it's counting how many times a particular receiver comes.
+                }
+            },
+            { $sort: { count: -1 } }, // Sort by count in descending order
+            { $limit: 5 } // Limit to top 5 users
+        ]);
+    
+        console.log("LISTING MOST FREQUENT USERS OF CURRENT USERS", topUsers);
+        res.json({ msg: "back and forth works" });
+    } catch (err) {
+        console.log(err);
+        res.json({ msg: "error occures", err: err});
+    }
 })
 
 
