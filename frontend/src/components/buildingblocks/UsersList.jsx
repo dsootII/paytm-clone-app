@@ -17,12 +17,12 @@ export default function UsersList(props) {
     const [frequentsList, setFrequentsList] = useState([]);
 
     const navigate = useNavigate();
-
+    
 
 
     useEffect(() => {
         //getting all users
-        axios.get("http://localhost:3000/api/v1/user/bulk")
+        axios.get("https://dummy-payment-platform.vercel.app/api/v1/user/bulk")
         .then(response => {
             if (response) {
                 let listOfUsers = [];
@@ -36,7 +36,7 @@ export default function UsersList(props) {
             }
         });
         //getting all friends of current user
-        axios.get('http://localhost:3000/api/v1/user/getfriends')
+        axios.get('https://dummy-payment-platform.vercel.app/api/v1/user/getfriends')
         .then(res => {
             let listOfFriends = [];
             for (let item of res.data.friends) {

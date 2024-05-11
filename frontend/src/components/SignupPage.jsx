@@ -28,7 +28,7 @@ export default function SignupPage(props) {
     // console.log("component rendered. State: ", credentials);
 
     function handleSubmit () {
-        axios.post("http://localhost:3000/api/v1/user/signup", credentials)
+        axios.post("https://dummy-payment-platform.vercel.app/api/v1/user/signup", credentials)
         .then(response => {
             console.log(response)
             try {

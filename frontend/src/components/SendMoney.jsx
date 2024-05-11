@@ -20,11 +20,11 @@ export default function SendMoneyPage(props) {
         const fromUserId = fromUserDetails.userId;
         setIsLoading(true);
         //we need db ids of both fromUser and toUser. we have the fromUser above. we need the toUser. 
-        axios.get("http://localhost:3000/api/v1/user/bulk?fullName="+toUser)
+        axios.get("https://dummy-payment-platform.vercel.app/api/v1/user/bulk?fullName="+toUser)
         .then(response=>{
             console.log("receiver's id recieved at frontend:", response.data.users[0]._id);
             const toUserId = response.data.users[0]._id;
-            axios.post("http://localhost:3000/api/v1/account/transfer", {
+            axios.post("https://dummy-payment-platform.vercel.app/api/v1/account/transfer", {
                 userId: fromUserId,
                 to: toUserId,
                 amount: transferAmount
@@ -34,7 +34,7 @@ export default function SendMoneyPage(props) {
                 setTimeout(() => {
                     alert('Transfer finished successfully! You will now be taken back to dashboard.')
                     navigate("/dashboard");
-                }, 3000);
+                }, 2300);
                 
             })
         }).catch(e => console.error(e))

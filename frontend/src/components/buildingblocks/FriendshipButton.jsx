@@ -22,13 +22,13 @@ export default function FriendshipButton({user, friendsList}) {
         //user - '<fn> <ln>'
         const [fn, ln] = user.split(' ');
         if (user == "Luffy D. Monkey") {
-            axios.post("http://localhost:3000/api/v1/user/setfriend", {firstName: "Luffy", lastName: "D. Monkey"})
+            axios.post("https://dummy-payment-platform.vercel.app/api/v1/user/setfriend", {firstName: "Luffy", lastName: "D. Monkey"})
             .then(res => {
                 setLabel('Unfriend');
             })
 
         } else {
-            axios.post('http://localhost:3000/api/v1/user/setfriend', {firstName:fn, lastName: ln})
+            axios.post('https://dummy-payment-platform.vercel.app/api/v1/user/setfriend', {firstName:fn, lastName: ln})
             .then(res => {
                 setLabel('Unfriend');
             })
@@ -38,13 +38,13 @@ export default function FriendshipButton({user, friendsList}) {
     function handleUnfriending(user) {
         const [fn, ln] = user.split(' ');
         if (user == "Luffy D. Monkey") {
-            axios.post("http://localhost:3000/api/v1/user/unfriend", {firstName: "Luffy", lastName: "D. Monkey"})
+            axios.post("https://dummy-payment-platform.vercel.app/api/v1/user/unfriend", {firstName: "Luffy", lastName: "D. Monkey"})
             .then(res => {
                 setLabel('Befriend');
             })
 
         } else {
-            axios.post('http://localhost:3000/api/v1/user/unfriend', {firstName:fn, lastName: ln})
+            axios.post('https://dummy-payment-platform.vercel.app/api/v1/user/unfriend', {firstName:fn, lastName: ln})
             .then(res => {
                 setLabel('Befriend');
             })

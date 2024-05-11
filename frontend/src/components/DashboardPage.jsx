@@ -20,7 +20,7 @@ export default function DashboardPage(props) {
 
     useEffect(() => {
         
-        axios.get('http://localhost:3000/api/v1/user/dashboard?userId='+userId)
+        axios.get('https://dummy-payment-platform.vercel.app/api/v1/user/dashboard?userId='+userId)
         .then(res => {
             setUserDetails(res.data);
         })

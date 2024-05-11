@@ -11,14 +11,6 @@ function classNames(...classes) {
 
 export default function GenericDropDown(props) {
 
-  const {token} = useAuthContext();
-  const {userId} = jwtDecode(token);
-
-  useEffect( () => {
-    //get friend list of the user
-    
-  }, [])
-
   function handleFriendsList() {
     props.setSearchedUsers( props.friendsList );
   }

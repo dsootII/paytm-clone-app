@@ -22,7 +22,7 @@ export default function TransactionsPage(props) {
     const navigate = useNavigate();
     
     useEffect(() => {
-        axios.get("http://localhost:3000/api/v1/user/transactions?userId="+userId)
+        axios.get("https://dummy-payment-platform.vercel.app/api/v1/user/transactions?userId="+userId)
         .then(res => {
             setSentTransactions(res.data.sent_transactions);
             setReceivedTransactions(res.data.received_transactions);
