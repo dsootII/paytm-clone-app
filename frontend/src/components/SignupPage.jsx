@@ -2,9 +2,7 @@ import React, { useState } from 'react'
 import InputBox from './buildingblocks/InputBox'
 import Button from './buildingblocks/Button'
 import { Link, useNavigate } from 'react-router-dom'
-import SigninPage from './SigninPage'
 import axios from 'axios';
-import DashboardPage from './DashboardPage'
 import { useAuthContext } from '../context/AuthContext'
 
 

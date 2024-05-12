@@ -22,6 +22,10 @@ export default function Routes() {
       {
         path: '/',
         element: <SignupPage />
+      },
+      {
+        path: '*',
+        element: <SignupPage />
       }
     ];
 
