@@ -14,8 +14,9 @@ export default function UsersList(props) {
     const [searchedUsers, setSearchedUsers] = useState([...users]); //this is not exactly needed as the useEffect anyway sets them both to what db gives back.
     const [foundUsers, setFoundUsers] = useState(true);
     const [friendsList, setFriendsList] = useState([]);
-    const [frequentsList, setFrequentsList] = useState([]);
+    const [loading, setLoading] = useState(false);
 
+    // const [frequentsList, setFrequentsList] = useState([]); 
     const navigate = useNavigate();
     
 
@@ -49,7 +50,12 @@ export default function UsersList(props) {
         // .then(res => {
         //     console.log("FREQUENTS AXIOS RESPONSE", res);
         // })
-    }, [])
+        if (loading) {
+            window.location.reload();
+          } else {
+            console.log('page already loaded');
+        }
+    }, [loading])
 
     function handleSearchInput (e) {
         searchInputRef.current = e.target.value;
@@ -61,10 +67,6 @@ export default function UsersList(props) {
                 searchInputRef.current ===""
             ) //filtering the whole list to only users whose first name (fn) or last name(ln) contains the searched query (searchInputRef.current)
         }));
-    }
-
-    function handleReload() {
-        window.location.reload();
     }
 
     
@@ -96,7 +98,7 @@ export default function UsersList(props) {
                     <div className='flex flex-col justify-end px-2'><GenericDropDown setSearchedUsers={setSearchedUsers} allUsers={users} friendsList={friendsList} setFriendsList={setFriendsList}/></div>
                     
                     {/* Reload Button */}
-                    <div className='flex flex-col justify-end px-1 py-2' onClick={handleReload}>
+                    <div className='flex flex-col justify-end px-1 py-2' onClick={() => setLoading(true)}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 hover:text-green-500 hover:shadow-lg rounded-full">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
